@@ -2,6 +2,7 @@ from src.repositories.nft_repository import NFTRepository
 from src.models.tokennft import TokenNFT
 import datetime
 import uuid
+import json
 
 class NFTService:
     def __init__(self, nft_repo: NFTRepository):

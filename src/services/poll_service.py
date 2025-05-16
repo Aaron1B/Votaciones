@@ -4,6 +4,7 @@ from src.repositories.nft_repository import NFTRepository
 from src.models.poll import Poll
 from src.models.vote import Vote
 import datetime
+import json
 
 class PollService:
     def __init__(self, encuesta_repo: EncuestaRepository, user_repo: UsuarioRepository, nft_repo: NFTRepository):

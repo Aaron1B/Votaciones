@@ -12,6 +12,7 @@ class GradioUI:
         self.chatbot_service = chatbot_service
 
     def launch(self):
+        gr.close_all()
         def votar(poll_id, username, opcion):
             return self.poll_service.vote(poll_id, username, opcion)
         def ver_encuestas():
@@ -47,4 +48,4 @@ class GradioUI:
                 nuevo_owner = gr.Textbox(label='Nuevo Dueño')
                 transfer_btn = gr.Button('Transferir')
                 transfer_btn.click(transferir, [token_id, nuevo_owner], None)
-        demo.launch()
+        demo.launch(server_port=7860, share=True)
