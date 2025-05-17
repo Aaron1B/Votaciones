@@ -22,7 +22,6 @@ class GradioUI:
             users = self.user_service.user_repo.get_users()
             if not users:
                 return []
-            # Solo mostrar username
             return [[u['username']] for u in users]
         def crear_encuesta(pregunta, opciones, duracion):
             opciones_list = [o.strip() for o in opciones.split(',') if o.strip()]
@@ -37,13 +36,28 @@ class GradioUI:
             polls = self.poll_service.encuesta_repo.get_polls_json()
             if not polls:
                 return []
-            # Mostrar solo columnas relevantes
             return [[p['id'], p['question'], ', '.join(p['options']), p['state']] for p in polls]
         def chat(mensaje):
             return self.chatbot_service.respond(mensaje)
-        def ver_tokens(username):
-            tokens = self.nft_service.nft_repo.get_tokens()
-            return [t for t in tokens if t['owner'] == username]
+        def ver_tokens_usuario(username):
+            tokens = self.nft_service.get_tokens_by_user(username)
+            if not tokens:
+                return []
+            return [[t['id'], t['poll_id'], t['option'], t['date']] for t in tokens]
+        def ver_tokens_todos():
+            users = self.user_service.user_repo.get_users()
+            tokens = self.nft_service.get_all_tokens()
+            result = []
+            for u in users:
+                user_tokens = [t for t in tokens if t['owner'] == u['username']]
+                for t in user_tokens:
+                    result.append([u['username'], t['id'], t['poll_id'], t['option'], t['date']])
+                if not user_tokens:
+                    result.append([u['username'], '', '', '', ''])
+            return result
+        def anadir_token(username, poll_id, option):
+            token = self.nft_service.generate_token(poll_id, option, username)
+            return f'Token añadido a {username}: {token.id}'
         def transferir(token_id, nuevo_owner):
             self.nft_service.transfer_token(token_id, nuevo_owner)
             return 'Transferido'
@@ -79,15 +93,20 @@ class GradioUI:
             chat_btn = gr.Button('Enviar')
             chat_btn.click(chat, chat_in, chat_out)
             gr.Markdown('---')
-            gr.Markdown('### Tus Tokens')
-            user_token = gr.Textbox(label='Usuario')
-            tokens_out = gr.Dataframe(label='Tokens')
-            def actualizar_tokens(username):
-                tokens = ver_tokens(username)
-                return tokens
-            user_token.change(actualizar_tokens, inputs=user_token, outputs=tokens_out)
-            token_id = gr.Textbox(label='ID Token')
-            nuevo_owner = gr.Textbox(label='Nuevo Dueño')
+            gr.Markdown('### Tokens de usuarios')
+            gr.Markdown('#### Lista de usuarios y sus tokens')
+            tokens_todos = gr.Dataframe(ver_tokens_todos, headers=["Usuario", "ID Token", "ID Encuesta", "Opción", "Fecha"], label='Tokens de todos los usuarios')
+            gr.Markdown('#### Añadir token a usuario')
+            add_user = gr.Textbox(label='Usuario')
+            add_poll = gr.Textbox(label='ID Encuesta')
+            add_option = gr.Textbox(label='Opción')
+            add_btn = gr.Button('Añadir Token')
+            add_out = gr.Textbox(label='Estado de añadido')
+            add_btn.click(anadir_token, [add_user, add_poll, add_option], add_out)
+            gr.Markdown('#### Transferir token')
+            transfer_token_id = gr.Textbox(label='ID Token')
+            transfer_new_owner = gr.Textbox(label='Nuevo Dueño')
             transfer_btn = gr.Button('Transferir')
-            transfer_btn.click(transferir, [token_id, nuevo_owner], None)
+            transfer_out = gr.Textbox(label='Estado de transferencia')
+            transfer_btn.click(transferir, [transfer_token_id, transfer_new_owner], transfer_out)
         demo.launch(server_port=7860, share=True)

@@ -22,3 +22,10 @@ class NFTService:
                 t['owner'] = new_owner
         with open(self.nft_repo.json_path, 'w') as f:
             json.dump(tokens, f)
+
+    def get_tokens_by_user(self, username):
+        tokens = self.nft_repo.get_tokens()
+        return [t for t in tokens if t['owner'] == username]
+
+    def get_all_tokens(self):
+        return self.nft_repo.get_tokens()
