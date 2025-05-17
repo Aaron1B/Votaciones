@@ -13,6 +13,18 @@ class GradioUI:
 
     def launch(self):
         gr.close_all()
+        def registrar_usuario(username, password):
+            user = self.user_service.register(username, password)
+            if user:
+                return 'Usuario registrado correctamente'
+            return 'El usuario ya existe'
+        def crear_encuesta(pregunta, opciones, duracion):
+            opciones_list = [o.strip() for o in opciones.split(',') if o.strip()]
+            poll_id = str(len(self.poll_service.encuesta_repo.get_polls_json()) + 1)
+            poll = self.poll_service.create_poll(poll_id, pregunta, opciones_list, duracion)
+            if poll:
+                return f'Encuesta creada: {poll.question}'
+            return 'Error al crear la encuesta'
         def votar(poll_id, username, opcion):
             return self.poll_service.vote(poll_id, username, opcion)
         def ver_encuestas():
@@ -26,6 +38,21 @@ class GradioUI:
             self.nft_service.transfer_token(token_id, nuevo_owner)
             return 'Transferido'
         with gr.Blocks() as demo:
+            gr.Markdown('### Registro de usuario')
+            reg_username = gr.Textbox(label='Nombre de usuario')
+            reg_password = gr.Textbox(label='Contraseña', type='password')
+            reg_btn = gr.Button('Registrar')
+            reg_out = gr.Textbox(label='Estado de registro')
+            reg_btn.click(registrar_usuario, [reg_username, reg_password], reg_out)
+            gr.Markdown('---')
+            gr.Markdown('### Crear nueva encuesta')
+            pregunta = gr.Textbox(label='Pregunta de la encuesta')
+            opciones = gr.Textbox(label='Opciones (separadas por coma)')
+            duracion = gr.Number(label='Duración (minutos)', value=5)
+            crear_btn = gr.Button('Crear encuesta')
+            crear_out = gr.Textbox(label='Estado de creación')
+            crear_btn.click(crear_encuesta, [pregunta, opciones, duracion], crear_out)
+            gr.Markdown('---')
             gr.Markdown('### Encuestas activas')
             encuestas = gr.Dataframe(ver_encuestas, label='Encuestas')
             poll_id = gr.Textbox(label='ID Encuesta')
