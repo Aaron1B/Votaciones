@@ -43,7 +43,11 @@ class GradioUI:
             with gr.Tab('Tokens'):
                 gr.Markdown('### Tus Tokens')
                 user_token = gr.Textbox(label='Usuario')
-                tokens_out = gr.Dataframe(ver_tokens, user_token, label='Tokens')
+                tokens_out = gr.Dataframe(label='Tokens')
+                def actualizar_tokens(username):
+                    tokens = ver_tokens(username)
+                    return tokens
+                user_token.change(actualizar_tokens, inputs=user_token, outputs=tokens_out)
                 token_id = gr.Textbox(label='ID Token')
                 nuevo_owner = gr.Textbox(label='Nuevo Dueño')
                 transfer_btn = gr.Button('Transferir')

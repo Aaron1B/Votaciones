@@ -26,9 +26,17 @@ cli = CLIController(poll_service, user_service, nft_service)
 ui = GradioUI(poll_service, user_service, nft_service, chatbot_service)
 
 def main():
+    print('Arrancando...')
+    print('Argumentos:', sys.argv)
     if '--ui' in sys.argv:
-        ui.launch()
+        print('Lanzando Gradio UI...')
+        try:
+            ui.launch()
+            print('Gradio lanzado correctamente.')
+        except Exception as e:
+            print('Error al lanzar Gradio:', e)
     else:
+        print('Lanzando CLI...')
         cli.run()
 
 if __name__ == '__main__':
