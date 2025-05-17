@@ -1,0 +1,1 @@
+[{"id": "1", "question": "Azul o Rojo", "options": ["Azul", "Rojo"], "votes": [], "state": "active", "created_at": "2025-05-17T12:02:55.189203", "closed_at": null, "duration": 5}, {"id": "2", "question": "Pizza o Hamburguesa", "options": ["Pizza", "Hamburguesa"], "votes": [], "state": "active", "created_at": "2025-05-17T12:07:40.719863", "closed_at": null, "duration": 5}]
