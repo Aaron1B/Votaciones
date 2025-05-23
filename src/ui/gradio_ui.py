@@ -61,9 +61,13 @@ class GradioUI:
             for _ in range(cantidad):
                 self.nft_service.generate_token('','',username, amount=1)
             return f'Se añadieron {cantidad} tokens a {username}'
-        def transferir(token_id, nuevo_owner):
-            self.nft_service.transfer_token(token_id, nuevo_owner)
-            return 'Transferido'
+        def transferir_tokens(from_user, to_user, cantidad):
+            try:
+                cantidad = int(cantidad)
+            except:
+                return 'Cantidad inválida'
+            transferidos = self.nft_service.transfer_tokens(from_user, to_user, cantidad)
+            return f'Transferidos {transferidos} tokens de {from_user} a {to_user}'
         with gr.Blocks() as demo:
             gr.Markdown('### Registro de usuario')
             reg_username = gr.Textbox(label='Nombre de usuario')
@@ -105,10 +109,11 @@ class GradioUI:
             add_btn = gr.Button('Añadir Tokens')
             add_out = gr.Textbox(label='Estado de añadido')
             add_btn.click(anadir_token, [add_user, add_amount], add_out)
-            gr.Markdown('#### Transferir token')
-            transfer_token_id = gr.Textbox(label='ID Token')
-            transfer_new_owner = gr.Textbox(label='Nuevo Dueño')
+            gr.Markdown('#### Transferir tokens entre usuarios')
+            transfer_from = gr.Textbox(label='Usuario origen')
+            transfer_to = gr.Textbox(label='Usuario destino')
+            transfer_amount = gr.Number(label='Cantidad de tokens', value=1)
             transfer_btn = gr.Button('Transferir')
             transfer_out = gr.Textbox(label='Estado de transferencia')
-            transfer_btn.click(transferir, [transfer_token_id, transfer_new_owner], transfer_out)
+            transfer_btn.click(transferir_tokens, [transfer_from, transfer_to, transfer_amount], transfer_out)
         demo.launch(server_port=7860, share=True)

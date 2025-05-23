@@ -30,3 +30,16 @@ class NFTService:
 
     def get_all_tokens(self):
         return self.nft_repo.get_tokens()
+
+    def transfer_tokens(self, from_user, to_user, amount):
+        tokens = self.nft_repo.get_tokens()
+        user_tokens = [t for t in tokens if t['owner'] == from_user]
+        transferred = 0
+        for t in user_tokens:
+            if transferred >= amount:
+                break
+            t['owner'] = to_user
+            transferred += 1
+        with open(self.nft_repo.json_path, 'w') as f:
+            json.dump(tokens, f)
+        return transferred
