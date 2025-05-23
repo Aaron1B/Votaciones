@@ -43,21 +43,24 @@ class GradioUI:
             tokens = self.nft_service.get_tokens_by_user(username)
             if not tokens:
                 return []
-            return [[t['id'], t['poll_id'], t['option'], t['date']] for t in tokens]
+            return [[t['id'], t.get('amount', 1), t['date']] for t in tokens]
         def ver_tokens_todos():
             users = self.user_service.user_repo.get_users()
             tokens = self.nft_service.get_all_tokens()
             result = []
             for u in users:
                 user_tokens = [t for t in tokens if t['owner'] == u['username']]
-                for t in user_tokens:
-                    result.append([u['username'], t['id'], t['poll_id'], t['option'], t['date']])
-                if not user_tokens:
-                    result.append([u['username'], '', '', '', ''])
+                total = sum(int(t.get('amount', 1)) for t in user_tokens)
+                result.append([u['username'], total])
             return result
-        def anadir_token(username, poll_id, option):
-            token = self.nft_service.generate_token(poll_id, option, username)
-            return f'Token añadido a {username}: {token.id}'
+        def anadir_token(username, cantidad):
+            try:
+                cantidad = int(cantidad)
+            except:
+                return 'Cantidad inválida'
+            for _ in range(cantidad):
+                self.nft_service.generate_token('','',username, amount=1)
+            return f'Se añadieron {cantidad} tokens a {username}'
         def transferir(token_id, nuevo_owner):
             self.nft_service.transfer_token(token_id, nuevo_owner)
             return 'Transferido'
@@ -94,15 +97,14 @@ class GradioUI:
             chat_btn.click(chat, chat_in, chat_out)
             gr.Markdown('---')
             gr.Markdown('### Tokens de usuarios')
-            gr.Markdown('#### Lista de usuarios y sus tokens')
-            tokens_todos = gr.Dataframe(ver_tokens_todos, headers=["Usuario", "ID Token", "ID Encuesta", "Opción", "Fecha"], label='Tokens de todos los usuarios')
-            gr.Markdown('#### Añadir token a usuario')
+            gr.Markdown('#### Lista de usuarios y total de tokens')
+            tokens_todos = gr.Dataframe(ver_tokens_todos, headers=["Usuario", "Total Tokens"], label='Tokens de todos los usuarios')
+            gr.Markdown('#### Añadir tokens a usuario')
             add_user = gr.Textbox(label='Usuario')
-            add_poll = gr.Textbox(label='ID Encuesta')
-            add_option = gr.Textbox(label='Opción')
-            add_btn = gr.Button('Añadir Token')
+            add_amount = gr.Number(label='Cantidad de tokens', value=1)
+            add_btn = gr.Button('Añadir Tokens')
             add_out = gr.Textbox(label='Estado de añadido')
-            add_btn.click(anadir_token, [add_user, add_poll, add_option], add_out)
+            add_btn.click(anadir_token, [add_user, add_amount], add_out)
             gr.Markdown('#### Transferir token')
             transfer_token_id = gr.Textbox(label='ID Token')
             transfer_new_owner = gr.Textbox(label='Nuevo Dueño')

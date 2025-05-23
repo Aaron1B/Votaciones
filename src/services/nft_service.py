@@ -8,10 +8,11 @@ class NFTService:
     def __init__(self, nft_repo: NFTRepository):
         self.nft_repo = nft_repo
 
-    def generate_token(self, poll_id, option, owner):
+    def generate_token(self, poll_id, option, owner, amount=1):
         token_id = str(uuid.uuid4())
         date = datetime.datetime.now().isoformat()
         token = TokenNFT(token_id, poll_id, option, date, owner)
+        token.amount = amount
         self.nft_repo.save_token(token)
         return token
 
